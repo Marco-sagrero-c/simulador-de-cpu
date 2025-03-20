@@ -51,65 +51,6 @@ void insertar_PCB(struct PCB **inicio, struct PCB *nodo){
 }
 }
 
-
-
-
-/* 
-void insertar_PCB(struct PCB **inicio, struct PCB *nodo) {
-    struct PCB *actual = *inicio;
-    struct PCB *previo = NULL;
-
-    while (actual != NULL && actual->pid < nodo->pid) {
-        previo = actual;
-        actual = actual->sig;
-    }
-
-    if (previo == NULL) {
-        nodo->sig = *inicio;
-        if (*inicio != NULL) {
-            (*inicio)->ant = nodo;
-        }
-        *inicio = nodo;
-    } else {
-        previo->sig = nodo;
-        nodo->ant = previo;
-        nodo->sig = actual;
-        if (actual != NULL) {
-            actual->ant = nodo;
-        }
-    }
-}
-*/
-/* 
-struct PCB *extraer_PCB(struct PCB **inicio, int pid) {
-    struct PCB *actual = *inicio;
-    struct PCB *previo = NULL;
-
-    while (actual != NULL && actual->pid != pid) {
-        previo = actual;
-        actual = actual->sig;
-    }
-
-    if (actual == NULL) {
-        return NULL;
-    } else if (previo == NULL) {
-        *inicio = actual->sig;
-        if (*inicio != NULL) {
-            (*inicio)->ant = NULL;
-        }
-    } else {
-        previo->sig = actual->sig;
-        if (actual->sig != NULL) {
-            actual->sig->ant = previo;
-        }
-    }
-
-    actual->ant = NULL;
-    actual->sig = NULL;
-    return actual;
-}
-*/
-
 struct PCB *extraer_PCB(struct PCB **inicio, int pid) {
     struct PCB *actual = *inicio;
     struct PCB *previo = NULL;
@@ -165,17 +106,6 @@ struct PCB *extraer_PCB(struct PCB **inicio, int pid) {
     return actual;
 }
 
-
-
-
-
-
-
-
-
-
-
-
 void eliminar_PCB(struct PCB *nodo) {
     if (nodo->programa==0)
     {
@@ -207,57 +137,3 @@ void vaciar_lista(struct PCB **cola) {
     *cola = NULL;
 }
 
-
-
-
-
-
-
-///////////////////////////////lista pala 
-
-/* 
-void insertarAlPrincipio(struct pala **cabeza, char *dato) {
-    // Verificar si el dato ya existe en la lista
-    struct pala *actual = *cabeza;
-    while (actual != NULL) {
-        if (strcmp(actual->dato, dato) == 0) {
-            // El dato ya existe, no es necesario agregarlo nuevamente
-            return;
-        }
-        actual = actual->siguiente;
-    }
-
-    // Crear un nuevo nodo
-    struct pala *nuevoNodo = (struct pala *)malloc(sizeof(struct pala));
-    if (nuevoNodo == NULL) {
-        return;
-    }
-
-    // Asignar el dato al nuevo nodo
-    nuevoNodo->dato = strdup(dato);
-    if (nuevoNodo->dato == NULL) {
-        free(nuevoNodo);
-        return;
-    }
-
-    // Establecer el siguiente del nuevo nodo como la cabeza actual
-    nuevoNodo->siguiente = *cabeza;
-
-    // Actualizar la cabeza para que apunte al nuevo nodo
-    *cabeza = nuevoNodo;
-}
-
-
-int liberarLista(struct pala *cabeza) {
-    int contador = 0; // Contador para registrar cuántas veces se libera memoria
-    struct pala *actual = cabeza;
-    while (actual != NULL) {
-        struct pala *temp = actual;
-        actual = actual->siguiente;
-        free(temp->dato);
-        free(temp);
-        contador++; // Incrementar el contador cada vez que se libera memoria
-    }
-    return contador; // Devolver el valor del contador al final de la función
-}
-*/

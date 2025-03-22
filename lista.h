@@ -14,9 +14,7 @@ struct PCB
     char *IR;
     /// 
     int marcos;
-    
     int familia;
-
     /// 
     int UID,KCPU,KCPUxU,P;// nuevo parametro
 

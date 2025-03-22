@@ -163,53 +163,6 @@ int bloques(FILE *archivo)
 
 
 
-int leer_linea_archivoB(long int posicion)
-{
-    if (salida != NULL)
-    {
-        fseek(salida, posicion, SEEK_SET); // Establecer la posición de lectura en el archivo
-
-        char buffer[32]; // Tamaño máximo de datos a leer
-        int bytes_leidos = 0;
-        int i = 0;
-
-        // Leer hasta que se encuentre un salto de línea o un carácter nulo
-        while ((bytes_leidos = fread(&buffer[i], sizeof(char), 1, salida)) > 0)
-        {
-            if (buffer[i] == '\n' || buffer[i] == '\0')
-            {
-                // Si encuentra un salto de línea o un carácter nulo, detener la lectura
-                buffer[i] = '\0'; // Terminar la cadena en el punto de detección
-
-                if (strcmp(buffer, "end") == 0)
-                {
-                    // printf("Se encontró la palabra 'end'. Finalizando ejecución.\n");
-                    i++;
-                    return 0; // Terminar la ejecución
-                }
-
-                // Analizar la línea utilizando sscanf
-                char comando[10];
-                char registro[10];
-                int valor;
-                sscanf(buffer, "%s %s %d", comando, registro, &valor);
-                printf("Comando: %s, Registro: %s, Valor: %d\n", comando, registro, valor);
-
-                break;
-            }
-            i++;
-        }
-
-        return 1; // Indica que se leyó una línea
-    }
-    else
-    {
-        // printf("Error al abrir el archivo.\n");
-        return 0; // Indica que hubo un error al abrir el archivo
-    }
-}
-
-
 
 
 char *leer_linea_cadena(long int posicion)

@@ -34,7 +34,6 @@ void Dispacher(struct PCB **lista1);
 void actu_U(struct PCB **lista, int us);
 void Actualiza_p(struct PCB **lista);
 int el_menor(struct PCB *lista);
-int error_de_pagina(int pid);
 
 ///////
 int IncCPU = 60 / QMAX; // Quantum por proceso
@@ -55,7 +54,7 @@ int hijo(struct PCB *lista, int padre);
 void heredar(int pid, int sobrino, struct PCB **lista, struct PCB **PCB);
 /////esta parte del codigo es para la RAM
 
-char Ram[4096] = {0};
+char Ram[128][32] = {0};
 
 void ver_ram();
 void mostrar_cap_ram();
@@ -72,9 +71,10 @@ void cargar_desde_swap(int pid, int pagina, struct ram *marco, struct tmp *swap)
 // struct ram RAM= NULL;
 /////
 int verificar_fallo_pagina(int pid, int pagina);
-int copiar_marco_completo_swap_a_ram(int pid, int marco_swap);
+int copiar_marco_completo_swap_a_ram(int pid, int marco_swap,long linea);
 int planificador_fifo();
 
+char *leer_linea_cadenaXD(long int posicion);
 int ver_ram_con = 0;
 
 int main(void)
@@ -101,13 +101,27 @@ int main(void)
     for (int i = 0; i < 8; i++)
     {
         int x = i * 512; // Cada marco ocupa 512 bytes
-
         ram_arr[i].pri = x;       // Dirección de inicio del marco en RAM
-        ram_arr[i].ult = x + 511; // Última dirección dentro del marco
-
         ram_arr[i].lleno = 0; // Indicar que el marco está vacío
         ram_arr[i].id = -1;   // No tiene proceso asignado
     }
+
+    /* 
+    for (int i = 0; i < 128; i++) // Recorrer todas las 128 líneas
+    {
+        // Calcular el número de marco al que pertenece esta línea
+        int marco = i / 16;  // Dividir la línea por 16 para obtener el marco (0 a 7)
+
+        // Convertir el número de marco a carácter (solo usamos el dígito de las decenas)
+        for (int j = 0; j < 32; j++)  // Cada línea tiene 32 caracteres
+        {
+            Ram[i][j] = '0' + (marco % 10);  // Asignamos el número del marco como carácter
+        }
+    }
+    */
+
+
+
 
     int TMP = 0;
     int long swap = 0;
@@ -279,7 +293,6 @@ int main(void)
         mvprintw(12, 0, "USU-%d", usuario(lista, AUX));
         mvprintw(12, 8, "         ");
         mvprintw(12, 8, "W = %d", W);
-
         VER_TMS(TMP);
         ver_swap(swap);
         ver_ram();
@@ -831,6 +844,7 @@ void draw(struct PCB *pcb, int marcos)
     mvprintw(15, 0, "-");
     /////////////////////////////////////////////////////////TMS
 
+
     if (pcb->pid == -1)
     {
         mvprintw(8, 10, "-PAG:[0]");
@@ -1340,36 +1354,35 @@ void ver_ram()
     int pos_y = 38;  // Fila inicial para mostrar el contenido
     int pos_x = 110; // Columna inicial
 
-    int inicio = ver_ram_con * 512;
+    // Calcular el inicio de la visualización de RAM (con base en la variable `ver_ram_con`)
+    int inicio = ver_ram_con * 16;  // Cambié de 512 a 16 ya que ahora estamos trabajando con 16 líneas por bloque
 
-    // Recorrer la RAM en bloques de 32 bytes
+    // Recorrer la RAM en bloques de 16 líneas (16 * 32 = 512 bytes)
     for (int i = 0; i < 16; i++) // Mostramos 16 líneas (16 * 32 = 512 bytes)
     {
         mvprintw(pos_y, pos_x, "%d %03d:", ver_ram_con, i);
 
         mvprintw(pos_y, pos_x + 15, "|");
-        for (int j = 0; j < 32; j++)
+        for (int j = 0; j < 32; j++)  // Cada línea tiene 32 caracteres
         {
-            int index = inicio + ((i * 32) + j); // Calcular posición en la RAM
-            char c = Ram[index];
+            // Acceder a la RAM correctamente en base a la nueva estructura
+            char c = Ram[inicio + i][j]; // Ahora usamos [inicio + i][j] para acceder correctamente
 
             if (c >= 32 && c <= 126)
             {
-                mvprintw(pos_y, pos_x + 11 + j, "%c", c);
+                mvprintw(pos_y, pos_x + 17 + j, "%c", c);  // Ajusté la posición para los caracteres
             }
             else
             {
-                mvprintw(pos_y, pos_x + 11 + j, "."); // Caracteres no imprimibles
+                mvprintw(pos_y, pos_x + 17 + j, ".");  // Caracteres no imprimibles
             }
         }
         mvprintw(pos_y, pos_x + 49, "|"); // Cierre de la línea
 
         pos_y++; // Mover a la siguiente fila
     }
-
-    mvprintw(0, 2, "$> "); // Restaurar el prompt
-    refresh();             // Actualizar la pantalla
 }
+
 
 int leer_linea_archivoBin(struct PCB *pcb, struct PCB **lista)
 {
@@ -1388,18 +1401,18 @@ int leer_linea_archivoBin(struct PCB *pcb, struct PCB **lista)
         pid_proseso = pcb->pid;
     }
 
+
+
+
     long linea = arreglo[MARCO].pri + pcb->PC % 16; // liena de donde lee el archivo  ,tambien la voy a usar para leer hacer el fallo de pag
     //
 
-    mvprintw(15, 2, "                                                      ");
-    mvprintw(15, 2, "pid ->%d MARCO->%d", pid_proseso, MARCO);
-    mvprintw(0, 2, "$>");
-    refresh();
 
     if (verificar_fallo_pagina(pid_proseso, MARCO) != 0)
     {
-        copiar_marco_completo_swap_a_ram(pid_proseso, MARCO);
+        copiar_marco_completo_swap_a_ram(pid_proseso, MARCO,linea);
     }
+
 
     int end = 0;
     // actualizar
@@ -1435,8 +1448,16 @@ int verificar_fallo_pagina(int pid, int pagina)
             return 0; // No hay fallo de página
         }
     }
+
+    const int fallos_p;
+    mvprintw(16, 2, "                                                      ");
+    mvprintw(16, 2, "fallos de pagina ->%d " ,fallos_p );
+    mvprintw(0, 2, "$>");
+
     return 1; // Hay fallo de página
 }
+
+
 
 int encontrar_marco_libre_ram()
 {
@@ -1451,7 +1472,8 @@ int encontrar_marco_libre_ram()
 }
 
 ///
-int copiar_marco_completo_swap_a_ram(int pid, int marco_swap)
+  // Retorna 0 si todas las líneas fueron copiadas correctamente
+int copiar_marco_completo_swap_a_ram(int pid, int marco_swap, long linea_Swap)
 {
     // Verificar si el marco en swap es válido
     if (marco_swap < 0 || marco_swap >= 4096 || arreglo[marco_swap].pri == -1)
@@ -1470,36 +1492,74 @@ int copiar_marco_completo_swap_a_ram(int pid, int marco_swap)
             return -1; // No hay espacio en RAM
         }
     }
-    // Guardar los marcos donde se copian las líneas
-    char buffer[32];
 
-    for (int linea = 0; linea < 16; linea++)
-    {
-        // Calcular la posición en el archivo swap
-        long posicion_swap = arreglo[marco_swap].pri + (linea * 32); // Cada línea ocupa 32 bytes
 
-        // Mover el puntero del archivo a la posición deseada
-        fseek(salida, posicion_swap, SEEK_SET);
+    // Buffer temporal para almacenar el número del marco como una cadena
+    int posicion_ram = marco_ram * 16; // La posición de inicio del marco en la RAM
+    long posicion_inicial_swap = linea_Swap + (marco_swap * 512);
+    char buffer[32];  // Buffer temporal para la línea
 
-        // Leer 32 bytes directamente en el buffer
-        size_t bytes_leidos = fread(buffer, sizeof(char), 32, salida);
+    // Recorrer los 16 renglones del marco
+    for (int lin = 0; lin < 16; lin++) 
+    { 
+        // Leer línea de SWAP
+        char *copia = leer_linea_cadenaXD(linea_Swap + (lin* 32)+posicion_inicial_swap);
 
-        // Asegurar que el buffer siempre tenga 32 caracteres
-        if (bytes_leidos < 32)
-        {
-            memset(buffer + bytes_leidos, '0', 32 - bytes_leidos); 
+        if (copia == NULL) {
+            continue; // Si la línea no existe, pasar a la siguiente
         }
 
-        // Copiar el buffer directamente a la RAM
-        memcpy(&Ram[marco_ram * 512 + linea * 32], buffer, 32);
+        // Copiar la línea en buffer
+        strncpy(buffer, copia, 32);
+        buffer[31] = '\0'; // Asegurar terminación de cadena
+
+        // Copiar en la RAM en la posición correcta
+        strncpy(Ram[posicion_ram + lin], buffer, 32);
     }
-    
+
+
     ram_arr[marco_ram].lleno = 1;
     ram_arr[marco_ram].id = pid;
     ram_arr[marco_ram].num_marco = marco_swap;
 
     return 0; // Retorna 0 si todas las líneas fueron copiadas correctamente
 }
+
+
+char *leer_linea_cadenaXD(long int posicion)
+{
+    if (salida != NULL)
+    {
+        fseek(salida, posicion, SEEK_SET);
+
+        char *buffer = malloc(TAMANIO_LINEA);
+        if (buffer == NULL) return NULL;
+
+        int i = 0;
+        while (fread(&buffer[i], sizeof(char), 1, salida) > 0)
+        {
+            if (buffer[i] == '\n' || buffer[i] == '\0')
+            {
+                buffer[i] = '\0';
+                return buffer;
+            }
+            i++;
+        }
+
+        if (i == 0)
+        {
+            free(buffer);
+            return NULL;
+        }
+
+        buffer[i] = '\0';
+        return buffer;
+    }
+    return NULL;
+}
+
+
+
 
 int planificador_fifo()
 {

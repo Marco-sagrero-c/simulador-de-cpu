@@ -39,7 +39,8 @@ int el_menor(struct PCB *lista);
 int IncCPU = 60 / QMAX; // Quantum por proceso
 int PBase = 60;         // Prioridad base para todos los procesos
 int NumUs = 0;          // Cantidad de usuarios para planificar
-int W = 0;              // Peso o ponderación de usuarios (inicializado en 0.0)
+int W = 0;    
+                        // Peso o ponderación de usuarios (inicializado en 0.0)
 int usu[100];           // Arreglo con IDs de usuarios, suponiendo un máximo de 100 usuarios
 
 ////////////////////modulo 4
@@ -106,22 +107,6 @@ int main(void)
         ram_arr[i].id = -1;   // No tiene proceso asignado
     }
 
-    /* 
-    for (int i = 0; i < 128; i++) // Recorrer todas las 128 líneas
-    {
-        // Calcular el número de marco al que pertenece esta línea
-        int marco = i / 16;  // Dividir la línea por 16 para obtener el marco (0 a 7)
-
-        // Convertir el número de marco a carácter (solo usamos el dígito de las decenas)
-        for (int j = 0; j < 32; j++)  // Cada línea tiene 32 caracteres
-        {
-            Ram[i][j] = '0' + (marco % 10);  // Asignamos el número del marco como carácter
-        }
-    }
-    */
-
-
-
 
     int TMP = 0;
     int long swap = 0;
@@ -163,10 +148,6 @@ int main(void)
 
         if (strcmp(copia, mensaje))
         {
-            if (lista == NULL)
-            {
-                // draw(PRINCIPAL, 0);
-            }
             mensage(mensaje);
             strcpy(copia, mensaje);
             refresh();
@@ -1492,39 +1473,27 @@ int copiar_marco_completo_swap_a_ram(int pid, int marco_swap, long linea_Swap)
             return -1; // No hay espacio en RAM
         }
     }
-
-
-    // Buffer temporal para almacenar el número del marco como una cadena
     int posicion_ram = marco_ram * 16; // La posición de inicio del marco en la RAM
-    long posicion_inicial_swap = linea_Swap + (marco_swap * 512);
-    char buffer[32];  // Buffer temporal para la línea
-
-    // Recorrer los 16 renglones del marco
+    long posicion_inicial_swap = arreglo[marco_swap].pri *32 ;
+    char buffer[32];  
+    char *copia;
     for (int lin = 0; lin < 16; lin++) 
     { 
-        // Leer línea de SWAP
-        char *copia = leer_linea_cadenaXD(linea_Swap + (lin* 32)+posicion_inicial_swap);
-
+            copia = leer_linea_cadenaXD((lin* 32)+posicion_inicial_swap);
         if (copia == NULL) {
             continue; // Si la línea no existe, pasar a la siguiente
         }
-
-        // Copiar la línea en buffer
         strncpy(buffer, copia, 32);
-        buffer[31] = '\0'; // Asegurar terminación de cadena
-
-        // Copiar en la RAM en la posición correcta
+        buffer[32] = '\0'; 
+        //Ram[i][j] = '0' + (marco % 10);  // Asignamos el número del marco como carácter
         strncpy(Ram[posicion_ram + lin], buffer, 32);
     }
-
-
+    
     ram_arr[marco_ram].lleno = 1;
     ram_arr[marco_ram].id = pid;
     ram_arr[marco_ram].num_marco = marco_swap;
-
-    return 0; // Retorna 0 si todas las líneas fueron copiadas correctamente
+    return 0; 
 }
-
 
 char *leer_linea_cadenaXD(long int posicion)
 {

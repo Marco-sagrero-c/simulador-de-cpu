@@ -14,6 +14,7 @@ struct PCB *crear_PCB(int pid) {
         nodo->CX = 0;
         nodo->DX = 0;
         nodo->PC = 0;
+        nodo->PC_real = 0;
         nodo->IR = malloc(100 * sizeof(char));
         nodo->fileName = malloc(100 * sizeof(char));
         nodo->programa=NULL;

@@ -43,4 +43,25 @@ mov ax 27
 mov ax 28
 mov ax 29
 mov ax 30
+mov bx 10
+mov bx 11
+mov bx 12
+mov bx 13
+mov bx 14
+mov bx 15
+mov bx 16
+mov bx 17
+mov bx 18
+mov bx 19
+mov bx 20
+mov bx 21
+mov bx 22
+mov bx 23
+mov bx 24
+mov bx 25
+mov bx 26
+mov bx 27
+mov bx 28
+mov bx 29
+mov bx 30
 end

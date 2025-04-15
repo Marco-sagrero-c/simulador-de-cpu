@@ -11,6 +11,7 @@ struct PCB
     struct PCB *sig;
     struct PCB *ant;
     int AX, BX, CX, DX, PC;
+    int PC_real;
     char *IR;
     /// 
     int marcos;

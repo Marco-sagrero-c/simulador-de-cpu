@@ -39,9 +39,9 @@ int el_menor(struct PCB *lista);
 int IncCPU = 60 / QMAX; // Quantum por proceso
 int PBase = 60;         // Prioridad base para todos los procesos
 int NumUs = 0;          // Cantidad de usuarios para planificar
-int W = 0;    
-                        // Peso o ponderación de usuarios (inicializado en 0.0)
-int usu[100];           // Arreglo con IDs de usuarios, suponiendo un máximo de 100 usuarios
+int W = 0;
+// Peso o ponderación de usuarios (inicializado en 0.0)
+int usu[100]; // Arreglo con IDs de usuarios, suponiendo un máximo de 100 usuarios
 
 ////////////////////modulo 4
 void VER_TMS(int Cantidad);
@@ -72,8 +72,11 @@ void cargar_desde_swap(int pid, int pagina, struct ram *marco, struct tmp *swap)
 // struct ram RAM= NULL;
 /////
 int verificar_fallo_pagina(int pid, int pagina);
-int copiar_marco_completo_swap_a_ram(int pid, int marco_swap,long linea);
+int copiar_marco_completo_swap_a_ram(int pid, int marco_swap, long linea);
 int planificador_fifo();
+
+int planificador_reloj();
+int puntero_reloj;
 
 char *leer_linea_cadenaXD(long int posicion);
 int ver_ram_con = 0;
@@ -101,12 +104,11 @@ int main(void)
 
     for (int i = 0; i < 8; i++)
     {
-        int x = i * 512; // Cada marco ocupa 512 bytes
-        ram_arr[i].pri = x;       // Dirección de inicio del marco en RAM
+        int x = i * 512;      // Cada marco ocupa 512 bytes
+        ram_arr[i].pri = x;   // Dirección de inicio del marco en RAM
         ram_arr[i].lleno = 0; // Indicar que el marco está vacío
         ram_arr[i].id = -1;   // No tiene proceso asignado
     }
-
 
     int TMP = 0;
     int long swap = 0;
@@ -206,7 +208,6 @@ int main(void)
                     {
 
                         int familia = hijo(lista, AUX->pid);
-
                         if (familia == 0)
                         {
                             liberarMarcosPorPID(AUX->pid);
@@ -229,6 +230,7 @@ int main(void)
             {
                 ver_listos(LISTOS);
                 AUXL = extraer_PCB(&LISTOS, LISTOS->pid);
+
                 int familia = buscarProgramaPorNombre(lista, AUX, AUXL);
 
                 if (familia != 0)
@@ -307,6 +309,15 @@ void liberarMarcosPorPID(int pid)
         {
             arreglo[i].lleno = 0; // Marcar como vacío
             arreglo[i].id = 0;    // Reiniciar PID
+        }
+    }
+
+    for (int i = 0; i < 8; i++)
+    {
+        if (ram_arr[i].id == pid)
+        {
+            ram_arr[i].lleno = 0; // Marcar como vacío
+            ram_arr[i].id = 0;    // Reiniciar PID
         }
     }
 }
@@ -825,7 +836,6 @@ void draw(struct PCB *pcb, int marcos)
     mvprintw(15, 0, "-");
     /////////////////////////////////////////////////////////TMS
 
-
     if (pcb->pid == -1)
     {
         mvprintw(8, 10, "-PAG:[0]");
@@ -926,21 +936,24 @@ int buscarProgramaPorNombre(struct PCB *lista, struct PCB *PCBejecucion, struct 
 int comandos(char *mensaje, struct PCB **lista, struct PCB **pcb, struct PCB **terminados, struct PCB **LISTOS)
 {
     char a[80] = {0}, b[80] = {0}, c[5] = {0};
-    sscanf(mensaje, "%s %s %s", a, b, c);
+    // sscanf(mensaje, "%s %s %s", a, b, c);
+    sscanf(mensaje, "%s %s ", a, b);
     FILE *archivo = NULL; // Archivo abierto
 
     strUpper(a);
 
     if (strcmp(a, "LOAD") == 0)
     {
-        if ((strcmp(b, "\n") == 0) || !(isdigit(c[0])))
+        // if ((strcmp(b, "\n") == 0) || !(isdigit(c[0])))
+        if ((strcmp(b, "\n") == 0))
         {
             mvprintw(13, 2, "                                                            ");
             mvprintw(13, 2, "FORMATO INCORRECTO LOAD archivo UsuarioID  ");
             refresh();
             return 0;
         }
-        int UID = atoi(c);
+        // int UID = atoi(c);
+        int UID = 1;
         mvprintw(13, 2, "                                                         ");
         mvprintw(13, 2, "se selecciono el archivo %s con usuario %d", b, UID);
         refresh();
@@ -959,7 +972,8 @@ int comandos(char *mensaje, struct PCB **lista, struct PCB **pcb, struct PCB **t
             int parentesco = buscarProgramaPorNombre(*lista, *pcb, PCB);
             int resultado = 1;
 
-            if (parentesco > 0)
+            // if (parentesco > 0)
+            if (false)
             {
                 // printf("hay familia  %d ------%d ...",parentesco,PCB->pid);
                 PCB->familia = parentesco;
@@ -1151,99 +1165,443 @@ int procesar_instruccion(char *instruccion, struct PCB *pcb)
 {
     char operacion[5];
     char registro[5];
+    int valor = 0;
     char registro_fuente[5];
 
-    // Parsear la instrucción
-    sscanf(instruccion, "%s %s %s", operacion, registro, registro_fuente);
+    if (sscanf(instruccion, "%s %s %s", operacion, registro, registro_fuente) < 1)
+    {
+        // pcb->PC = pcb->PC-1;
+        mvprintw(15, 2, "                                                      ");
+        mvprintw(15, 2, "espacio vacio ");
+        refresh();
+        return 4; // sicnifica que es un espacio que no se cuenta
+    }
 
-    // Convertir a mayúsculas
     strUpper(operacion);
     strUpper(registro);
     strUpper(registro_fuente);
 
-    // Manejar la operación END
     if (strcmp(operacion, "END") == 0)
     {
-        mostrar_mensaje("se encontro un end");
-        return 3; // Código de finalización
+        mvprintw(14, 2, "                                                      ");
+        mvprintw(14, 2, "se encontro un end ");
+        refresh();
+        return 1;
     }
 
-    // Validar el registro destino
-    if (isdigit(registro[0]))
-    {
-        mostrar_mensaje("registro no valido");
-        return 1; // Código de error
-    }
-
-    // Obtener el valor del registro fuente
-    int valor = obtener_valor(registro_fuente, pcb);
-    if (valor == -1)
-    {
-        return 1; // Código de error
-    }
-
-    // Arreglo de punteros a los registros para simplificar el acceso
-    int *registros[] = {&pcb->AX, &pcb->BX, &pcb->CX, &pcb->DX};
-    const char *nombres_registros[] = {"AX", "BX", "CX", "DX"};
-
-    // Buscar el registro destino
-    int *registro_destino = NULL;
-    for (int i = 0; i < 4; i++)
-    {
-        if (strcmp(registro, nombres_registros[i]) == 0)
-        {
-            registro_destino = registros[i];
-            break;
-        }
-    }
-
-    if (registro_destino == NULL)
-    {
-        mostrar_mensaje("registro no valido");
-        return 1; // Código de error
-    }
-
-    // Realizar la operación correspondiente
     if (strcmp(operacion, "MOV") == 0)
     {
-        *registro_destino = valor;
+        if (isdigit(registro_fuente[0]))
+        {
+            // Si el registro fuente es un número, convertirlo a entero
+            valor = atoi(registro_fuente);
+        }
+        else if (strcmp(registro_fuente, "AX") == 0)
+        {
+            valor = pcb->AX;
+        }
+        else if (strcmp(registro_fuente, "BX") == 0)
+        {
+            valor = pcb->BX;
+        }
+        else if (strcmp(registro_fuente, "CX") == 0)
+        {
+            valor = pcb->CX;
+        }
+        else if (strcmp(registro_fuente, "DX") == 0)
+        {
+            valor = pcb->DX;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro_fuente);
+            refresh();
+            return 1;
+        }
+
+        if (isdigit(registro[0]))
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
+        if (strcmp(registro, "AX") == 0)
+        {
+            pcb->AX = valor;
+        }
+        else if (strcmp(registro, "BX") == 0)
+        {
+            pcb->BX = valor;
+        }
+        else if (strcmp(registro, "CX") == 0)
+        {
+            pcb->CX = valor;
+        }
+        else if (strcmp(registro, "DX") == 0)
+        {
+            pcb->DX = valor;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
     }
     else if (strcmp(operacion, "ADD") == 0)
     {
-        *registro_destino += valor;
+        if (isdigit(registro_fuente[0]))
+        {
+            // Si el registro fuente es un número, convertirlo a entero
+            valor = atoi(registro_fuente);
+        }
+        else if (strcmp(registro_fuente, "AX") == 0)
+        {
+            valor = pcb->AX;
+        }
+        else if (strcmp(registro_fuente, "BX") == 0)
+        {
+            valor = pcb->BX;
+        }
+        else if (strcmp(registro_fuente, "CX") == 0)
+        {
+            valor = pcb->CX;
+        }
+        else if (strcmp(registro_fuente, "DX") == 0)
+        {
+            valor = pcb->DX;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro_fuente);
+            refresh();
+            return 1;
+        }
+        if (isdigit(registro[0]))
+        {
+            mvprintw(14, 2, "                                             ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
+
+        if (strcmp(registro, "AX") == 0)
+        {
+            pcb->AX += valor;
+        }
+        else if (strcmp(registro, "BX") == 0)
+        {
+            pcb->BX += valor;
+        }
+        else if (strcmp(registro, "CX") == 0)
+        {
+            pcb->CX += valor;
+        }
+        else if (strcmp(registro, "DX") == 0)
+        {
+            pcb->DX += valor;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
     }
     else if (strcmp(operacion, "SUB") == 0)
     {
-        *registro_destino -= valor;
+        if (isdigit(registro_fuente[0]))
+        {
+            // Si el registro fuente es un número, convertirlo a entero
+            valor = atoi(registro_fuente);
+        }
+        else if (strcmp(registro_fuente, "AX") == 0)
+        {
+            valor = pcb->AX;
+        }
+        else if (strcmp(registro_fuente, "BX") == 0)
+        {
+            valor = pcb->BX;
+        }
+        else if (strcmp(registro_fuente, "CX") == 0)
+        {
+            valor = pcb->CX;
+        }
+        else if (strcmp(registro_fuente, "DX") == 0)
+        {
+            valor = pcb->DX;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro_fuente);
+            refresh();
+            return 1;
+        }
+        if (isdigit(registro[0]))
+        {
+            mvprintw(14, 2, "                                                ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
+
+        if (strcmp(registro, "AX") == 0)
+        {
+            pcb->AX -= valor;
+        }
+        else if (strcmp(registro, "BX") == 0)
+        {
+            pcb->BX -= valor;
+        }
+        else if (strcmp(registro, "CX") == 0)
+        {
+            pcb->CX -= valor;
+        }
+        else if (strcmp(registro, "DX") == 0)
+        {
+            pcb->DX -= valor;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
     }
     else if (strcmp(operacion, "MUL") == 0)
     {
-        *registro_destino *= valor;
+        if (isdigit(registro_fuente[0]))
+        {
+            // Si el registro fuente es un número, convertirlo a entero
+            valor = atoi(registro_fuente);
+        }
+        else if (strcmp(registro_fuente, "AX") == 0)
+        {
+            valor = pcb->AX;
+        }
+        else if (strcmp(registro_fuente, "BX") == 0)
+        {
+            valor = pcb->BX;
+        }
+        else if (strcmp(registro_fuente, "CX") == 0)
+        {
+            valor = pcb->CX;
+        }
+        else if (strcmp(registro_fuente, "DX") == 0)
+        {
+            valor = pcb->DX;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro_fuente);
+            refresh();
+            return 1;
+        }
+        if (isdigit(registro[0]))
+        {
+            mvprintw(14, 2, "                                         ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
+
+        if (strcmp(registro, "AX") == 0)
+        {
+            pcb->AX *= valor;
+        }
+        else if (strcmp(registro, "BX") == 0)
+        {
+            pcb->BX *= valor;
+        }
+        else if (strcmp(registro, "CX") == 0)
+        {
+            pcb->CX *= valor;
+        }
+        else if (strcmp(registro, "DX") == 0)
+        {
+            pcb->DX *= valor;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
     }
     else if (strcmp(operacion, "DIV") == 0)
     {
+        if (isdigit(registro_fuente[0]))
+        {
+            // Si el registro fuente es un número, convertirlo a entero
+            valor = atoi(registro_fuente);
+        }
+        else if (strcmp(registro_fuente, "AX") == 0)
+        {
+            valor = pcb->AX;
+        }
+        else if (strcmp(registro_fuente, "BX") == 0)
+        {
+            valor = pcb->BX;
+        }
+        else if (strcmp(registro_fuente, "CX") == 0)
+        {
+            valor = pcb->CX;
+        }
+        else if (strcmp(registro_fuente, "DX") == 0)
+        {
+            valor = pcb->DX;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro_fuente);
+            refresh();
+            return 1;
+        }
+        if (isdigit(registro[0]))
+        {
+            mvprintw(14, 2, "                                    ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
+
         if (valor == 0)
         {
-            mostrar_mensaje("division por cero no valido");
-            return 1; // Código de error
+            mvprintw(14, 2, "                                            ");
+            mvprintw(14, 2, "divicion por cero no valido ");
+            refresh();
+            return 1;
         }
-        *registro_destino /= valor;
-    }
-    else if (strcmp(operacion, "INC") == 0)
-    {
-        (*registro_destino)++;
+
+        if (strcmp(registro, "AX") == 0)
+        {
+            pcb->AX = pcb->AX / valor;
+        }
+        else if (strcmp(registro, "BX") == 0)
+        {
+            pcb->BX = pcb->BX / valor;
+        }
+        else if (strcmp(registro, "CX") == 0)
+        {
+            pcb->CX = pcb->CX / valor;
+        }
+        else if (strcmp(registro, "DX") == 0)
+        {
+            pcb->DX = pcb->DX / valor;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
     }
     else if (strcmp(operacion, "DEC") == 0)
     {
-        (*registro_destino)--;
+
+        if (isdigit(registro[0]))
+        {
+            mvprintw(14, 2, "                                             ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
+
+        if (strcmp(registro, "AX") == 0)
+        {
+            pcb->AX--;
+        }
+        else if (strcmp(registro, "BX") == 0)
+        {
+            pcb->BX--;
+        }
+        else if (strcmp(registro, "CX") == 0)
+        {
+            pcb->CX--;
+        }
+        else if (strcmp(registro, "DX") == 0)
+        {
+            pcb->DX--;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        } ////////////////////////////
+    }
+    else if (strcmp(operacion, "JNZ") == 0)
+    {
+        if (isdigit(registro[0]))
+        {
+            // Si el registro fuente es un número, convertirlo a entero
+            valor = atoi(registro_fuente);
+        }
+
+        if (valor > 0)
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "el valor es menor a cero %d", valor);
+            refresh();
+            return 1;
+        }
+        pcb->PC_real = valor;
+    }
+    ////////////////
+    else if (strcmp(operacion, "INC") == 0)
+    {
+        if (isdigit(registro[0]))
+        {
+            mvprintw(14, 2, "                                             ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
+
+        if (strcmp(registro, "AX") == 0)
+        {
+            pcb->AX++;
+        }
+        else if (strcmp(registro, "BX") == 0)
+        {
+            pcb->BX++;
+        }
+        else if (strcmp(registro, "CX") == 0)
+        {
+            pcb->CX++;
+        }
+        else if (strcmp(registro, "DX") == 0)
+        {
+            pcb->DX++;
+        }
+        else
+        {
+            mvprintw(14, 2, "                                                      ");
+            mvprintw(14, 2, "registro no valido %s", registro);
+            refresh();
+            return 1;
+        }
     }
     else
     {
-        mostrar_mensaje("operacion no valida");
-        return 1; // Código de error
+        mvprintw(14, 2, "                                                ");
+        mvprintw(14, 2, "operacion no valida %s", operacion);
+        refresh();
+        return 1;
     }
-
-    return 0; // Éxito
+    return 0;
 }
 
 void ver_swap(int long posicion)
@@ -1302,23 +1660,33 @@ void ver_swap(int long posicion)
 
 void mostrar_cap_ram()
 {
-    mvprintw(37, 170, "--RAM: Estado de Marcos -"); // Título
+    mvprintw(37, 165, "--RAM: Estado de Marcos -"); // Título
 
     int pos_y = 38;  // Fila inicial para mostrar los marcos
-    int pos_x = 172; // Columna inicial
+    int pos_x = 165; // Columna inicial
 
     // Recorrer cada marco en la RAM
     for (int j = 0; j < 8; j++)
     {
+        if (puntero_reloj == j)
+        {
+            mvprintw(pos_y + j, pos_x - 4, "->");
+        }
+        else
+        {
+            mvprintw(pos_y + j, pos_x - 4, "  ");
+        }
+
         if (ram_arr[j].lleno)
         {
             // Marco lleno: mostrar PID y página
-            mvprintw(pos_y + j, pos_x, "- %d: PID %d  N-marco %d", j + 1, ram_arr[j].id, ram_arr[j].num_marco);
+            mvprintw(pos_y + j, pos_x, "                                 ");
+            mvprintw(pos_y + j, pos_x, "- %d: PID %d N-marco %d puntero %d", j + 1, ram_arr[j].id, ram_arr[j].num_marco, ram_arr[j].bit_retraso);
         }
         else
         {
             // Marco vacío
-            mvprintw(pos_y + j, pos_x, "- %d: Libre", j + 1);
+            mvprintw(pos_y + j, pos_x, "- %d: Libre                      ", j + 1);
         }
     }
 
@@ -1336,7 +1704,7 @@ void ver_ram()
     int pos_x = 110; // Columna inicial
 
     // Calcular el inicio de la visualización de RAM (con base en la variable `ver_ram_con`)
-    int inicio = ver_ram_con * 16;  // Cambié de 512 a 16 ya que ahora estamos trabajando con 16 líneas por bloque
+    int inicio = ver_ram_con * 16; // Cambié de 512 a 16 ya que ahora estamos trabajando con 16 líneas por bloque
 
     // Recorrer la RAM en bloques de 16 líneas (16 * 32 = 512 bytes)
     for (int i = 0; i < 16; i++) // Mostramos 16 líneas (16 * 32 = 512 bytes)
@@ -1344,18 +1712,18 @@ void ver_ram()
         mvprintw(pos_y, pos_x, "%d %03d:", ver_ram_con, i);
 
         mvprintw(pos_y, pos_x + 15, "|");
-        for (int j = 0; j < 32; j++)  // Cada línea tiene 32 caracteres
+        for (int j = 0; j < 32; j++) // Cada línea tiene 32 caracteres
         {
             // Acceder a la RAM correctamente en base a la nueva estructura
             char c = Ram[inicio + i][j]; // Ahora usamos [inicio + i][j] para acceder correctamente
 
             if (c >= 32 && c <= 126)
             {
-                mvprintw(pos_y, pos_x + 17 + j, "%c", c);  // Ajusté la posición para los caracteres
+                mvprintw(pos_y, pos_x + 17 + j, "%c", c); // Ajusté la posición para los caracteres
             }
             else
             {
-                mvprintw(pos_y, pos_x + 17 + j, ".");  // Caracteres no imprimibles
+                mvprintw(pos_y, pos_x + 17 + j, "."); // Caracteres no imprimibles
             }
         }
         mvprintw(pos_y, pos_x + 49, "|"); // Cierre de la línea
@@ -1363,7 +1731,6 @@ void ver_ram()
         pos_y++; // Mover a la siguiente fila
     }
 }
-
 
 int leer_linea_archivoBin(struct PCB *pcb, struct PCB **lista)
 {
@@ -1373,27 +1740,22 @@ int leer_linea_archivoBin(struct PCB *pcb, struct PCB **lista)
 
     if (pcb->familia != 0) // verifica si tiene familirares si si lo hace con el de la familia sino lo hace con el propio
     {
-        MARCO = obtenerMarco(pcb->familia, pcb->PC / 16);
+        MARCO = obtenerMarco(pcb->familia, pcb->PC_real / 16);
         pid_proseso = pcb->familia;
     }
     else
     {
-        MARCO = obtenerMarco(pcb->pid, pcb->PC / 16);
+        MARCO = obtenerMarco(pcb->pid, pcb->PC_real / 16);
         pid_proseso = pcb->pid;
     }
 
-
-
-
-    long linea = arreglo[MARCO].pri + pcb->PC % 16; // liena de donde lee el archivo  ,tambien la voy a usar para leer hacer el fallo de pag
+    long linea = arreglo[MARCO].pri + pcb->PC_real % 16; // liena de donde lee el archivo  ,tambien la voy a usar para leer hacer el fallo de pag
     //
-
 
     if (verificar_fallo_pagina(pid_proseso, MARCO) != 0)
     {
-        copiar_marco_completo_swap_a_ram(pid_proseso, MARCO,linea);
+        copiar_marco_completo_swap_a_ram(pid_proseso, MARCO, linea);
     }
-
 
     int end = 0;
     // actualizar
@@ -1401,6 +1763,24 @@ int leer_linea_archivoBin(struct PCB *pcb, struct PCB **lista)
 
     strcpy(pcb->IR, cadena);
     end = procesar_instruccion(cadena, pcb);
+
+    pcb->PC_real++;
+
+    if (end == 4)
+    {
+        return 1;
+    }
+
+    for (int i = 0; i < 8; i++)
+    {
+        if (ram_arr[i].num_marco == MARCO)
+        {
+            ram_arr[i].bit_retraso=1;
+        }
+    }
+
+    // ram_arr[]
+
     pcb->PC++;
     pcb->KCPU += 12;
     usu[pcb->UID] += 12;
@@ -1429,16 +1809,8 @@ int verificar_fallo_pagina(int pid, int pagina)
             return 0; // No hay fallo de página
         }
     }
-
-    const int fallos_p;
-    mvprintw(16, 2, "                                                      ");
-    mvprintw(16, 2, "fallos de pagina ->%d " ,fallos_p );
-    mvprintw(0, 2, "$>");
-
     return 1; // Hay fallo de página
 }
-
-
 
 int encontrar_marco_libre_ram()
 {
@@ -1453,7 +1825,7 @@ int encontrar_marco_libre_ram()
 }
 
 ///
-  // Retorna 0 si todas las líneas fueron copiadas correctamente
+// Retorna 0 si todas las líneas fueron copiadas correctamente
 int copiar_marco_completo_swap_a_ram(int pid, int marco_swap, long linea_Swap)
 {
     // Verificar si el marco en swap es válido
@@ -1466,33 +1838,37 @@ int copiar_marco_completo_swap_a_ram(int pid, int marco_swap, long linea_Swap)
     int marco_ram = encontrar_marco_libre_ram();
     if (marco_ram == -1)
     {
-        planificador_fifo(); // Llamar al planificador FIFO si no hay espacio
+        // planificador_fifo(); // Llamar al planificador FIFO si no hay espacio
+        planificador_reloj();
         marco_ram = encontrar_marco_libre_ram();
         if (marco_ram == -1)
         {
             return -1; // No hay espacio en RAM
         }
     }
+
     int posicion_ram = marco_ram * 16; // La posición de inicio del marco en la RAM
-    long posicion_inicial_swap = arreglo[marco_swap].pri *32 ;
-    char buffer[32];  
+    long posicion_inicial_swap = arreglo[marco_swap].pri * 32;
+    char buffer[32];
     char *copia;
-    for (int lin = 0; lin < 16; lin++) 
-    { 
-            copia = leer_linea_cadenaXD((lin* 32)+posicion_inicial_swap);
-        if (copia == NULL) {
+    for (int lin = 0; lin < 16; lin++)
+    {
+        copia = leer_linea_cadenaXD((lin * 32) + posicion_inicial_swap);
+        if (copia == NULL)
+        {
             continue; // Si la línea no existe, pasar a la siguiente
         }
         strncpy(buffer, copia, 32);
-        buffer[32] = '\0'; 
-        //Ram[i][j] = '0' + (marco % 10);  // Asignamos el número del marco como carácter
+        buffer[32] = '\0';
         strncpy(Ram[posicion_ram + lin], buffer, 32);
     }
-    
+
     ram_arr[marco_ram].lleno = 1;
     ram_arr[marco_ram].id = pid;
     ram_arr[marco_ram].num_marco = marco_swap;
-    return 0; 
+
+    ram_arr[marco_ram].bit_retraso = 1;
+    return 0;
 }
 
 char *leer_linea_cadenaXD(long int posicion)
@@ -1502,7 +1878,8 @@ char *leer_linea_cadenaXD(long int posicion)
         fseek(salida, posicion, SEEK_SET);
 
         char *buffer = malloc(TAMANIO_LINEA);
-        if (buffer == NULL) return NULL;
+        if (buffer == NULL)
+            return NULL;
 
         int i = 0;
         while (fread(&buffer[i], sizeof(char), 1, salida) > 0)
@@ -1527,9 +1904,6 @@ char *leer_linea_cadenaXD(long int posicion)
     return NULL;
 }
 
-
-
-
 int planificador_fifo()
 {
     static int cuenta = 0; // Variable estática para llevar el índice del marco a reemplazar
@@ -1545,4 +1919,27 @@ int planificador_fifo()
         cuenta = 0; // Reiniciar el contador si alcanza el número de marcos
     }
     return cuenta;
+}
+
+int planificador_reloj()
+{
+    static int puntero = 0; // Puntero del reloj
+
+    while (1)
+    {
+        // Si el bit de uso es 0, se reemplaza esta página
+        if (ram_arr[puntero].bit_retraso == 0)
+        {
+            ram_arr[puntero].lleno = 0; // Marcar el marco como libre
+            ram_arr[puntero].id = 0;    // Reiniciar el ID del proceso
+            return puntero;             // Devolver el índice del marco reemplazado
+        }
+        // Si el bit de uso es 1, se pone en 0 y se avanza el puntero
+        ram_arr[puntero].bit_retraso = 0;
+
+        // Avanzar el puntero circularmente
+
+        puntero = (puntero + 1) % 8;
+        puntero_reloj = puntero;
+    }
 }

@@ -275,9 +275,8 @@ Uso de Librerías
 
 
 #Modificaciones a hacer 
-1.- que de la memoria swap a la memoria ram copie de manera correcta. 
-
+1.- que de la memoria swap a la memoria ram copie de manera correcta. -listo 
 2.- agregar una instruccion nueva que es para saltar entre las lineas. 
-3.- que el planificador fifo se inicialicé de manera adecuada.
-4.- que los prosesor con el mismo nombre sean del usuario que sean sean prosesos independientes los cuales ocupara su memoria de manera independiente.
+3.- que el planificador fifo se inicialicé de manera adecuada. --listo
+4.- que los prosesor con el mismo nombre sean del usuario que sean sean prosesos independientes los cuales ocupara su memoria de manera independiente.--listo 
 5- agregar los algoridmos de sustitucion de pagina (lru) clock(segunda chanse)

@@ -23,6 +23,14 @@ struct ram {
     int num_marco;  // Número del marco en la RAM
     int id;         // ID del proceso dueño del marco
     int contador;   // Contador para el orden de carga (FIFO)
+
+    //////reloj
+    int bit_retraso; // solo es para saber si se usa del vit de 0 y 1
+    int puntero;// es el apuntador para ver quien sigue para el reloj
+    /////
+    
+    
+    
 };
 
 

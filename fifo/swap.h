@@ -28,7 +28,8 @@ struct ram {
     int bit_retraso; // solo es para saber si se usa del vit de 0 y 1
     int puntero;// es el apuntador para ver quien sigue para el reloj
     /////
-    
+    int uso;
+
     
     
 };

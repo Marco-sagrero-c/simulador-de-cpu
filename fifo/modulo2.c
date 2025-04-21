@@ -75,9 +75,9 @@ int verificar_fallo_pagina(int pid, int pagina);
 int copiar_marco_completo_swap_a_ram(int pid, int marco_swap, long linea);
 int planificador_fifo();
 
-int planificador_reloj();
+void planificador_reloj();
 int puntero_reloj;
-
+int tiempo_global_lru = 0;
 char *leer_linea_cadenaXD(long int posicion);
 int ver_ram_con = 0;
 
@@ -1776,6 +1776,9 @@ int leer_linea_archivoBin(struct PCB *pcb, struct PCB **lista)
         if (ram_arr[i].num_marco == MARCO)
         {
             ram_arr[i].bit_retraso=1;
+            //ram_arr[i].uso = tiempo_global_lru;
+            //tiempo_global_lru++;
+
         }
     }
 
@@ -1921,25 +1924,63 @@ int planificador_fifo()
     return cuenta;
 }
 
-int planificador_reloj()
-{
-    static int puntero = 0; // Puntero del reloj
 
+void planificador_reloj()
+{
     while (1)
     {
-        // Si el bit de uso es 0, se reemplaza esta página
-        if (ram_arr[puntero].bit_retraso == 0)
+        if (ram_arr[puntero_reloj].bit_retraso == 0)
         {
-            ram_arr[puntero].lleno = 0; // Marcar el marco como libre
-            ram_arr[puntero].id = 0;    // Reiniciar el ID del proceso
-            return puntero;             // Devolver el índice del marco reemplazado
+            // Se encontró una víctima, devolvemos el índice actual
+            break;
         }
-        // Si el bit de uso es 1, se pone en 0 y se avanza el puntero
-        ram_arr[puntero].bit_retraso = 0;
 
-        // Avanzar el puntero circularmente
-
-        puntero = (puntero + 1) % 8;
-        puntero_reloj = puntero;
+        // Si el bit está en 1, se pone a 0 y se avanza
+        ram_arr[puntero_reloj].bit_retraso = 0;
+        puntero_reloj = (puntero_reloj + 1) % 8; // Circular
+        mostrar_cap_ram();
+        usleep(100000);  
     }
+
+ram_arr[puntero_reloj].id = 0;
+ram_arr[puntero_reloj].lleno = 0;
+ram_arr[puntero_reloj].bit_retraso = 0;
+
+// Avanzamos el puntero global después de insertar
+puntero_reloj = (puntero_reloj + 1) % 8;
 }
+
+
+
+
+int planificador_lru()
+{
+    int indice = -1;
+    int menor_uso = __INT_MAX__; // Valor muy grande para comenzar
+
+    // Buscar el marco con el menor valor de uso
+    for (int i = 0; i < 8; i++)
+    {
+        if (ram_arr[i].lleno && ram_arr[i].uso < menor_uso)
+        {
+            menor_uso = ram_arr[i].uso;
+            indice = i;
+        }
+    }
+
+    // Si no encontró uno (todos están vacíos), usar el primero vacío
+    if (indice == -1)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            if (!ram_arr[i].lleno)
+                return i;
+        }
+    }
+
+    // Desalojar el marco LRU
+    ram_arr[indice].lleno = 0;
+    ram_arr[indice].id = 0;
+    return indice;
+}
+

@@ -1,0 +1,192 @@
+
+Algoritmo: CAR
+Fallos de página: 100, 
+Algoritmo: LRU
+Fallos de página: 99, 
+Algoritmo: FIFO
+Fallos de página: 180, 
+Algoritmo: Reloj
+Fallos de página: 147, 
+
+
+Algoritmo: CAR
+Fallos de página: 0, 
+Algoritmo: CAR
+Fallos de página: 101,accesos a memoria 150 
+Algoritmo: CAR
+Fallos de página: 3,accesos a memoria 25 
+Algoritmo: CAR
+Fallos de página: 31,accesos a memoria 100 
+Algoritmo: Reloj
+Fallos de página: 54,accesos a memoria 125 
+Algoritmo: CAR
+Fallos de página: 2,accesos a memoria 87 
+Algoritmo: CAR
+Fallos de página: 5,accesos a memoria 87 
+Algoritmo: CAR
+Fallos de página: 2,accesos a memoria 174 
+Algoritmo: CAR
+Fallos de página: 38,accesos a memoria 38 
+Algoritmo: CAR
+Fallos de página: 36,accesos a memoria 36 
+Algoritmo: CAR
+Fallos de página: 12,accesos a memoria 12 
+Algoritmo: CAR
+Fallos de página: 12,accesos a memoria 11 
+Algoritmo: CAR
+Fallos de página: 12,accesos a memoria 11 
+Algoritmo: CAR
+Fallos de página: 0,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 12,accesos a memoria 11 
+Algoritmo: CAR
+Fallos de página: 3,accesos a memoria 87 
+Algoritmo: CAR
+Fallos de página: 12,accesos a memoria 87 
+Algoritmo: CAR
+Fallos de página: 651,accesos a memoria 609 
+Algoritmo: CAR
+Fallos de página: 0,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 1259,accesos a memoria 870 
+Algoritmo: LRU
+Fallos de página: 1556,accesos a memoria 870 
+Algoritmo: LRU
+Fallos de página: 0,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 3,accesos a memoria 87 
+Algoritmo: CAR
+Fallos de página: 1582,accesos a memoria 870 
+Algoritmo: LRU
+Fallos de página: 1720,accesos a memoria 870 
+Algoritmo: LRU
+Fallos de página: 0,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 814,accesos a memoria 750 
+Algoritmo: CAR
+Fallos de página: 0,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 814,accesos a memoria 750 
+Algoritmo: LRU
+Fallos de página: 1210,accesos a memoria 750 
+Algoritmo: LRU
+Fallos de página: 1210,accesos a memoria 750 
+Algoritmo: CAR
+Fallos de página: 385,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 24,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 68,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 16,accesos a memoria 696 
+Algoritmo: CAR
+Fallos de página: 102,accesos a memoria 696 
+Algoritmo: CAR
+Fallos de página: 88,accesos a memoria 87 
+Algoritmo: CAR
+Fallos de página: 88,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 16,accesos a memoria 16 
+Algoritmo: CAR
+Fallos de página: 16,accesos a memoria 88 
+ram equilibrada
+Algoritmo: CAR
+Fallos de página: 16,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 16,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 16,accesos a memoria 88 
+Algoritmo: LRU
+Fallos de página: 16,accesos a memoria 88 
+
+
+Algoritmo: FIFO
+Fallos de página: 51,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 43,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 51,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 51,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 51,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 56,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 51,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 51,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 0,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 43,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 0,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 43,accesos a memoria 88 
+Algoritmo: LRU
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: LRU
+Fallos de página: 184,accesos a memoria 176 
+Algoritmo: Reloj
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 64,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 64,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 51,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 49,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 42,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 39,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 77,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 0,accesos a memoria 0 
+Algoritmo: CAR
+Fallos de página: 51,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 94,accesos a memoria 176 
+Algoritmo: LRU
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 43,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 43,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 43,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 43,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: FIFO
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 92,accesos a memoria 88 
+Algoritmo: Reloj
+Fallos de página: 12,accesos a memoria 88 
+Algoritmo: CAR
+Fallos de página: 3,accesos a memoria 88 

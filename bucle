@@ -1,0 +1,5 @@
+mov cx 9
+
+dec cx
+jnz cx
+end
